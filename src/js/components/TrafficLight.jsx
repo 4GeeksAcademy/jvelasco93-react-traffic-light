@@ -2,18 +2,21 @@ import React, { useEffect, useRef, useState } from "react";
 import "./TrafficLight.css";
 
 export default function TrafficLight() {
-  const intervalId = useRef(null);
-
   const [activeLight, setActiveLight] = useState(null);
   const [isAutoRunning, setIsAutoRunning] = useState(false);
-
-  const lights = ["red", "yellow", "green"];
+  const [lights, setLights] = useState(["red", "yellow", "green"]);
+  const lightsRef = useRef(lights);
+  const intervalId = useRef(null);
 
   useEffect(() => {
     return () => {
       clearInterval(intervalId.current);
     };
   }, []);
+
+  useEffect(() => {
+    lightsRef.current = lights;
+  }, [lights]);
 
   return (
     <div className="d-flex flex-column gap-3 align-items-center">
@@ -58,13 +61,46 @@ export default function TrafficLight() {
           Stop
         </button>
       </div>
+
+      <div className="d-flex gap-2">
+        <button
+          type="button"
+          onClick={addPurpleLight}
+          className="btn btn-outline-primary"
+          disabled={lights.includes("purple")}
+        >
+          Add purple light
+        </button>
+
+        <button
+          type="button"
+          onClick={removePurpleLight}
+          className="btn btn-outline-primary"
+          disabled={!lights.includes("purple")}
+        >
+          Remove purple light
+        </button>
+      </div>
     </div>
   );
 
+  function removePurpleLight() {
+    setLights((prevLights) => prevLights.filter((light) => light !== "purple"));
+    setActiveLight((prevLight) => (prevLight === "purple" ? null : prevLight));
+  }
+
+  function addPurpleLight() {
+    setLights((prevLights) => {
+      if (prevLights.includes("purple")) return prevLights;
+      return [...prevLights, "purple"];
+    });
+  }
+
   function handleChangeLight() {
     setActiveLight((prevLight) => {
-      const nextIndex = (lights.indexOf(prevLight) + 1) % lights.length;
-      return lights[nextIndex];
+      const nextIndex =
+        (lightsRef.current.indexOf(prevLight) + 1) % lightsRef.current.length;
+      return lightsRef.current[nextIndex];
     });
   }
 
