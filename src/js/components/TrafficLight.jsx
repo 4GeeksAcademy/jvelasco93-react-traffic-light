@@ -6,19 +6,35 @@ export default function TrafficLight() {
 
   const lights = ["red", "yellow", "green"];
 
+  function handleChangeLight() {
+    const currentIndex = lights.lastIndexOf(activeLight);
+    const nextIndex = (currentIndex + 1) % lights.length;
+    setActiveLight(lights[nextIndex]);
+  }
+
   return (
-    <div className="traffic-light">
-      {lights.map((light) => (
-        <div
-          key={light}
-          className={`light ${light} ${activeLight === light ? "active" : ""}`}
-          onClick={() =>
-            setActiveLight((prevLight) => (prevLight === light ? null : light))
-          }
-          // Uso la palabra prevLight para asegurarme de que estoy utilizando el valor más reciente del estado, evitando posibles problemas de asincronía al actualizar el estado.
-          // Si bien, aun estudio si es realmente necesario en este caso, ya que el estado se actualiza de forma síncrona al hacer clic en un elemento, lo que significa que el valor de activeLight se actualizará inmediatamente después de la llamada a setActiveLight.
-        ></div>
-      ))}
+    <div className="d-flex flex-column gap-2">
+      <div className="traffic-light">
+        {lights.map((light) => (
+          <div
+            key={light}
+            className={`light ${light} ${activeLight === light ? "active" : ""}`}
+            onClick={() =>
+              setActiveLight((prevLight) =>
+                prevLight === light ? null : light,
+              )
+            }
+          ></div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={handleChangeLight}
+        className="btn btn-outline-secondary"
+      >
+        Change light
+      </button>
     </div>
   );
 }
