@@ -1,19 +1,22 @@
-import { React, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./TrafficLight.css";
 
 export default function TrafficLight() {
+  const intervalId = useRef(null);
+
   const [activeLight, setActiveLight] = useState(null);
+  const [isAutoRunning, setIsAutoRunning] = useState(false);
 
   const lights = ["red", "yellow", "green"];
 
-  function handleChangeLight() {
-    const currentIndex = lights.lastIndexOf(activeLight);
-    const nextIndex = (currentIndex + 1) % lights.length;
-    setActiveLight(lights[nextIndex]);
-  }
+  useEffect(() => {
+    return () => {
+      clearInterval(intervalId.current);
+    };
+  }, []);
 
   return (
-    <div className="d-flex flex-column gap-2">
+    <div className="d-flex flex-column gap-3 align-items-center">
       <div className="traffic-light">
         {lights.map((light) => (
           <div
@@ -35,36 +38,52 @@ export default function TrafficLight() {
       >
         Change light
       </button>
+
+      <div className="d-flex gap-2">
+        <button
+          type="button"
+          onClick={startAutoChange}
+          className="btn btn-outline-warning"
+          disabled={isAutoRunning}
+        >
+          Go Berserk
+        </button>
+
+        <button
+          type="button"
+          onClick={stopAutoChange}
+          className="btn btn-outline-danger"
+          disabled={!isAutoRunning}
+        >
+          Stop
+        </button>
+      </div>
     </div>
   );
+
+  function handleChangeLight() {
+    setActiveLight((prevLight) => {
+      const nextIndex = (lights.indexOf(prevLight) + 1) % lights.length;
+      return lights[nextIndex];
+    });
+  }
+
+  function startAutoChange() {
+    if (intervalId.current !== null) return;
+
+    intervalId.current = setInterval(() => {
+      handleChangeLight();
+    }, 200);
+
+    setIsAutoRunning(true);
+  }
+
+  function stopAutoChange() {
+    if (intervalId.current === null) return;
+
+    clearInterval(intervalId.current);
+    intervalId.current = null;
+
+    setIsAutoRunning(false);
+  }
 }
-
-// DEJO ESTA IMPLEMENTACION COMO WIP PARA ESTUDIAR LOS EXTRAS DEL EJERCICIO.
-// export default function TrafficLight() {
-//     const [activeLight, setActiveLight] = useState(null);
-
-//     return (
-//       <div className="traffic-light">
-//         <div
-//           className={`light red ${activeLight === "red" ? "active" : ""}`}
-//           onClick={() =>
-//             setActiveLight(activeLight === "red" ? null : "red")
-//           }
-//         ></div>
-
-//         <div
-//           className={`light yellow ${activeLight === "yellow" ? "active" : ""}`}
-//           onClick={() =>
-//             setActiveLight(activeLight === "yellow" ? null : "yellow")
-//           }
-//         ></div>
-
-//         <div
-//           className={`light green ${activeLight === "green" ? "active" : ""}`}
-//           onClick={() =>
-//             setActiveLight(activeLight === "green" ? null : "green")
-//           }
-//         ></div>
-//       </div>
-//     );
-//   }
